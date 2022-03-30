@@ -30,28 +30,28 @@ architecture Behavioral of cache_controller is
 -------------------------------------------------------------------------------------------------------------
 ---TAG parameters
 -------------------------------------------------------------------------------------------------------------
-    signal tag : STD_LOGIC_VECTOR(7 downto 0);
-    signal index : STD_LOGIC_VECTOR(2 downto 0);
-    signal offset : STD_LOGIC_VECTOR(4 downto 0); 
+signal tag : STD_LOGIC_VECTOR(7 downto 0);
+signal index : STD_LOGIC_VECTOR(2 downto 0);
+signal offset : STD_LOGIC_VECTOR(4 downto 0); 
 	 
 -------------------------------------------------------------------------------------------------------------
 --SRAM paramenters
 -------------------------------------------------------------------------------------------------------------
 
 --There is 8 bit position, each bit position refers to an index value of the SRAM
-    signal dirtybit : STD_LOGIC_VECTOR (7 downto 0) := "00000000"; --initialize to zero
-    signal validbit : STD_LOGIC_VECTOR (7 downto 0) := "00000000"; --"                   "
+signal dirtybit : STD_LOGIC_VECTOR (7 downto 0) := "00000000"; --initialize to zero
+signal validbit : STD_LOGIC_VECTOR (7 downto 0) := "00000000"; --"                   "
     
 --Tag Register Block
 -- 8 memory block position w/ 32 words each
-    type register_type is array(7 downto 0) of STD_LOGIC_VECTOR(7 downto 0);    --create register of index 8 for 8 memory block
-    signal tag_register_block : register_type:=((others => (others => '0'))); --initialize with zeros
+type register_type is array(7 downto 0) of STD_LOGIC_VECTOR(7 downto 0);    --create register of index 8 for 8 memory block
+signal tag_register_block : register_type:=((others => (others => '0'))); --initialize with zeros
     
 -------------------------------------------------------------------------------------------------------------
 --SDRAM paramenters
 -------------------------------------------------------------------------------------------------------------
     
-	 signal memory_offset: STD_LOGIC_VECTOR(5 downto 0) := "000000";   --one bit larger than required to allow counter logic to be implemented more easily. 
+signal memory_offset: STD_LOGIC_VECTOR(5 downto 0) := "000000";   --one bit larger than required to allow counter logic to be implemented more easily. 
 	 
 -------------------------------------------------------------------------------------------------------------
 --FSM paramenters
@@ -80,17 +80,17 @@ begin
                 
                 case(state) is								--NOTE .. the reason for Wait_1 and Wait_2
 					 
-					 WHEN Wait_1 =>							--CPU needs to see o_cache_controller_ready <='0' for 2 clock cyles mutiple clock cycles to begin
+		   WHEN Wait_1 =>							--CPU needs to see o_cache_controller_ready <='0' for 2 clock cyles mutiple clock cycles to begin
 																		--before it can receive a o_cache_controller_ready <='1' trigger
-					   o_cache_controller_ready <='0'; 
+			 o_cache_controller_ready <='0'; 
 								
-					   state <= Wait_2; 
+			 state <= Wait_2; 
             
-                     WHEN Wait_2 =>
+                   WHEN Wait_2 =>
 								
-					   state <= Processor_request;
+			state <= Processor_request;
 							
-					 WHEN Processor_request =>
+		   WHEN Processor_request =>
                         
                         o_WEN_SRAM <= "0";             --reset parameters...make debug easier<--
                         o_WEN_SDRAM <= '0';
@@ -105,16 +105,16 @@ begin
                             state <= Preload_TAG_index_offset;
                         end if;
                      
-					 WHEN Preload_TAG_index_offset => 
+		    WHEN Preload_TAG_index_offset => 
 
                         o_cache_controller_ready <= '0';         --set "o_cache_controller_ready <= "0" which signifies cache controller processing command...do not update address
                         tag <= i_adr(15 downto 8);               --determine WORD ADDRESS REGISTER FIELDS <--
                         index <= i_adr(7 downto 5);              --
                         offset <= i_adr(4 downto 0);             --                                       <-- 
                         
-						--preload address from CPU TO SRAM, DO NOT include offset---determined at time of transfer 
+			--preload address from CPU TO SRAM, DO NOT include offset---determined at time of transfer 
                         
-						o_adr_SRAM(7 downto 5) <= i_adr(7 downto 5); --same as preloading index
+			o_adr_SRAM(7 downto 5) <= i_adr(7 downto 5); --same as preloading index
                         o_adr_SDRAM(15 downto 5) <= i_adr(15 downto 5); --preload address from CPU TO SDRAM  tag + index, DO NOT include offset---determined at time of transfer 
 
                         state <= Compare_TAG; 
@@ -123,7 +123,7 @@ begin
 
                         --compare input address tag & index to current values in SRAM
                         
-						if((validbit(to_integer(unsigned(index))) = '1') AND (tag_register_block(to_integer(unsigned(index)))= tag )) then
+			if((validbit(to_integer(unsigned(index))) = '1') AND (tag_register_block(to_integer(unsigned(index)))= tag )) then
                                 
                            state <= HIT; -- TAG found 
                                 
@@ -143,7 +143,7 @@ begin
                     
                            -- send data to CPU, address already partially determined in Preload_TAG_index_offset state only "offset required" 
                            
-									o_data_to_SRAM <= i_data_from_CPU;  
+			   o_data_to_SRAM <= i_data_from_CPU;  
                            
                            o_adr_SRAM(4 downto 0) <= offset; 
                            
@@ -162,19 +162,19 @@ begin
                     
                         end if;         
                     
-				     WHEN WAIT_data_to_CPU_1 =>			-- 2 clock delay required for SRAM to transfer appropriate data from given address
+		     WHEN WAIT_data_to_CPU_1 =>			-- 2 clock delay required for SRAM to transfer appropriate data from given address
                         
-					   state <= WAIT_data_to_CPU_2;
+			state <= WAIT_data_to_CPU_2;
 
                      WHEN WAIT_data_to_CPU_2 =>
                         
-					   state <= WAIT_data_to_CPU_3;
+			state <= WAIT_data_to_CPU_3;
 
                      WHEN WAIT_data_to_CPU_3 =>
                             
-					   o_data_to_CPU <= i_data_from_SRAM; 	-- data now available to send to CPU,
+			o_data_to_CPU <= i_data_from_SRAM; 	-- data now available to send to CPU,
                            
-					   state <= Wait_1;
+			state <= Wait_1;
 
                      WHEN MISS => --TAG not found
             
@@ -189,7 +189,7 @@ begin
 
                            o_adr_SDRAM(15 downto 8) <= tag_register_block(to_integer(unsigned(index)));  --copy old tag to current SDRAM output address
          
-									state <= Write_to_SDRAM_A; 
+			   state <= Write_to_SDRAM_A; 
                 
                         else   -- address in cache not present, add data corresponding to address in SDRAM
                 
@@ -216,11 +216,11 @@ begin
                     
                         else 
                            
-						  o_memory_strobe <= '0';
+			   o_memory_strobe <= '0';
         
                            --address already partially preloaded during during Compare_TAG/MISS state, w/o offset 
                                  
-						  o_adr_SDRAM(4 downto 0) <= memory_offset(4 downto 0);  --start with address offset 0000 for DRAM write operation  
+			   o_adr_SDRAM(4 downto 0) <= memory_offset(4 downto 0);  --start with address offset 0000 for DRAM write operation  
                             
                            --determine SRAM address to output to SDRAM
                            --tag + index  not required because it doesn't change---already preloaded in tag_compare/MISS state
@@ -233,36 +233,36 @@ begin
                          
 						end if;
                      
-					 WHEN Write_to_SDRAM_B =>	--wait on SRAM to provided data ... 2 clock cycle delay between sending address and receiving data
+		    WHEN Write_to_SDRAM_B =>	--wait on SRAM to provided data ... 2 clock cycle delay between sending address and receiving data
 
-					   state <= Write_to_SDRAM_C;
+			state <= Write_to_SDRAM_C;
                       
-					 WHEN Write_to_SDRAM_C =>  -- data from SRAM available...send to SDRAM
+		    WHEN Write_to_SDRAM_C =>  -- data from SRAM available...send to SDRAM
 							
-					   o_memory_strobe <= '1'; 
+			o_memory_strobe <= '1'; 
 									
-					   o_WEN_SRAM <= "0";      
+			o_WEN_SRAM <= "0";      
                             
-					   o_WEN_SDRAM <= '1';     -- prepare DRAM for writing 
+			o_WEN_SDRAM <= '1';     -- prepare DRAM for writing 
 									
-					   o_data_to_SDRAM <= i_data_from_SRAM; -- send data from SRAM to SDRAM
+			o_data_to_SDRAM <= i_data_from_SRAM; -- send data from SRAM to SDRAM
 									
-					   state <= Write_to_SDRAM_A;
+			state <= Write_to_SDRAM_A;
 							
                      WHEN Write_from_SDRAM_A =>
             
                         if(memory_offset > "011111") then   -- 32 words per block to write "Memory Strobe" every other i_clk  as per specifications
 									
-						   memory_offset <= "000000";         -- reset memory offset to 0, start position 
+			   memory_offset <= "000000";         -- reset memory offset to 0, start position 
 									
                            validbit(to_integer(unsigned(index)))<= '1'; -- block write complete, tag register complete, now valid
                     
                            tag_register_block(to_integer(unsigned(index))) <= tag; --writing block complete, update tag
                            
                            o_adr_SDRAM(4 downto 0) <= "00000"; --optional 
-						   o_adr_SRAM(4 downto 0) <= "00000"; 
+			   o_adr_SRAM(4 downto 0) <= "00000"; 
 									
-						   o_WEN_SRAM <= "0";
+			   o_WEN_SRAM <= "0";
                             
                            o_memory_strobe <= '0';
                             
@@ -270,7 +270,7 @@ begin
                         
                          else
                               
-						   o_memory_strobe <= '0';
+			   o_memory_strobe <= '0';
 										
                            o_adr_SDRAM(4 downto 0) <= memory_offset(4 downto 0); 
                                 
@@ -280,25 +280,25 @@ begin
                                 
                            memory_offset <= memory_offset + "000001"; -- increment to memory offset to next word 
                               
-						   state <= Write_from_SDRAM_B; 
+			   state <= Write_from_SDRAM_B; 
 										
                          end if;
 								
                      WHEN Write_from_SDRAM_B => --wait on SRAM to process data ... 2 clock cycle delay between sending address and receiving data
 						  
-					   state <= Write_from_SDRAM_C; 
+		     	state <= Write_from_SDRAM_C; 
 						  
-				     WHEN Write_from_SDRAM_C => 	-- data from SDRAM able to be input into SRAM
+		     WHEN Write_from_SDRAM_C => 	-- data from SDRAM able to be input into SRAM
 								
-					   o_memory_strobe <= '1'; 
+		     	o_memory_strobe <= '1'; 
 								
-					   o_WEN_SRAM <= "1";
+			o_WEN_SRAM <= "1";
 								
-					   o_WEN_SDRAM <= '0'; 
+			o_WEN_SDRAM <= '0'; 
 								
-					   o_data_to_SRAM <= i_data_from_SDRAM;  --sent data from SDRAM to SRAM
+			o_data_to_SRAM <= i_data_from_SDRAM;  --sent data from SDRAM to SRAM
 								
-					   state <= Write_from_SDRAM_A;
+			state <= Write_from_SDRAM_A;
                               
                      WHEN others => 
                  
