@@ -1,16 +1,16 @@
 ----------------------------------------------------------------------------------
--- Company:				Ryerson University 
--- Engineer: 			Victor Dumitriu
+-- Company:	Ryerson University 
+-- Engineer: 	Victor Dumitriu
 -- 
--- Design Name: 		CPU Read/Write Transaction Generator
+-- Design Name:         CPU Read/Write Transaction Generator
 -- Module Name:		CPU_gen - Behavioral 
--- Target Devices: 	XC3S500E
+-- Target Devices: 	
 --
 -- Description: 		A testbench circuit for course COE758, Project 1.
---							The circuit plays the role of a CPU, generating read
---							and write transactions to various addresses. The Cache
---							Controller being designed for Project 1 must respond to
---							these transactions.
+--				The circuit plays the role of a CPU, generating read
+--				and write transactions to various addresses. The Cache
+--				Controller being designed for Project 1 must respond to
+--				these transactions.
 --
 -- Dependencies: 		None.
 ----------------------------------------------------------------------------------
@@ -26,14 +26,14 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 entity CPU_gen is
 	Port ( 
-	  clk 		: in  STD_LOGIC;
-      rst 		: in  STD_LOGIC;
-      trig 		: in  STD_LOGIC;
+	  clk : in  STD_LOGIC;
+          rst : in  STD_LOGIC;
+         trig : in  STD_LOGIC;
 		-- Interface to the Cache Controller.
-      Address 	: out  STD_LOGIC_VECTOR (15 downto 0);
-      wr_rd 	: out  STD_LOGIC;
-      cs 		: out  STD_LOGIC;
-      DOut 		: out  STD_LOGIC_VECTOR (7 downto 0)
+      	 Address : out  STD_LOGIC_VECTOR (15 downto 0);
+         wr_rd : out  STD_LOGIC;
+         cs : out  STD_LOGIC;
+         DOut : out  STD_LOGIC_VECTOR (7 downto 0)
 	);
 end CPU_gen;
 
