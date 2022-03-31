@@ -156,7 +156,7 @@ begin
                            -- address already partially determined in Preload_TAG_index_offset state only "offset required" 
                            o_adr_SRAM(4 downto 0) <= offset; 
 									
-						   o_WEN_SRAM <= "0"; -- set SRAM for read mode
+			   o_WEN_SRAM <= "0"; -- set SRAM for read mode
                     
                            state <= WAIT_data_to_CPU_1; 
                     
@@ -204,9 +204,9 @@ begin
                            memory_offset <= "000000";      -- reset memory offset to 0, start position
                     
                            o_adr_SDRAM(4 downto 0) <= "00000"; -- optional 
-						   o_adr_SRAM(4 downto 0) <= "00000"; 
+			   o_adr_SRAM(4 downto 0) <= "00000"; 
 									
-						   o_memory_strobe <= '0'; 
+			   o_memory_strobe <= '0'; 
                     
                            o_WEN_SDRAM <= '0';
                            
